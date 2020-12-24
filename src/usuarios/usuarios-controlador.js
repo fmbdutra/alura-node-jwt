@@ -1,6 +1,21 @@
 const Usuario = require('./usuarios-modelo');
 const { InvalidArgumentError, InternalServerError } = require('../erros');
 
+const jwt = require('jsonwebtoken');
+
+function criaTokenJWT(usuario){
+  const payload = {
+    id: usuario.id
+  };
+/*
+Para ter uma chave secreta jwt e colocar no .env - colocar no terminal:
+node -e "console.log(require('crypto').randomBytes(256).toString('base64'))"
+*/
+  const token = jwt.sign(payload, process.env.CHAVE_JWT);
+
+  return token;
+}
+
 module.exports = {
   adiciona: async (req, res) => {
     const { nome, email, senha } = req.body;
@@ -28,6 +43,9 @@ module.exports = {
   },
 
   login: (req, res) => {
+    const token = criaTokenJWT(req.user);
+    res.set('Authorization', token);
+    
     res.status(204).send();
   },
 
